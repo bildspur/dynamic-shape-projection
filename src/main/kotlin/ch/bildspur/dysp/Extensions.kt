@@ -177,12 +177,18 @@ fun Mat.gray() {
 }
 
 fun Mat.erode(erosionSize: Int) {
+    if(erosionSize == 0)
+        return
+
     val element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, Size(2.0 * erosionSize + 1.0, 2.0 * erosionSize + 1.0))
     Imgproc.erode(this, this, element)
     element.release()
 }
 
 fun Mat.dilate(dilationSize: Int) {
+    if(dilationSize == 0)
+        return
+
     val element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, Size(2.0 * dilationSize + 1.0, 2.0 * dilationSize + 1.0))
     Imgproc.dilate(this, this, element)
     element.release()
@@ -211,4 +217,10 @@ fun Mat.getRegionMask(regionLabel: Int): Mat {
     val labeledMask = this.zeros(CvType.CV_8U)
     Core.inRange(this, Scalar(regionLabel.toDouble()), Scalar(regionLabel.toDouble()), labeledMask)
     return labeledMask
+}
+
+fun PGraphics.imageRect(image : PImage, x : Float, y : Float, width : Float, height : Float)
+{
+    val ratio = if(width - image.width < height - image.height) width / image.width else height / image.height
+    this.image(image, x, y, image.width * ratio, image.height * ratio)
 }

@@ -57,6 +57,8 @@ class Sketch : PApplet() {
 
     var tracker = ActiveRegionTracker()
 
+    var previewCreated = false
+
     init {
 
     }
@@ -82,7 +84,6 @@ class Sketch : PApplet() {
 
         // setup output
         output = createGraphics(OUTPUT_WIDTH, OUTPUT_HEIGHT, PApplet.P2D)
-        preview = createGraphics(320, 240, PApplet.P2D)
     }
 
     override fun draw() {
@@ -108,6 +109,13 @@ class Sketch : PApplet() {
         if (camera!!.width == 0) {
             text("waiting for frame...", width / 2 - 75f, height / 2f - 50f)
             return
+        }
+
+        // first time create preview image
+        if(!previewCreated)
+        {
+            preview = createGraphics(camera!!.width, camera!!.height, PApplet.P2D)
+            previewCreated = true
         }
 
         val sourceImage = camera!!
@@ -174,8 +182,8 @@ class Sketch : PApplet() {
         syphon.sendImageToSyphon(output)
 
         // paint preview
-        image(preview, 10f, 10f)
-        image(output, width - 30f - 250f, 10f + 57.5f, 250f, 125f)
+        g.imageRect(preview, 10f, 10f, 300f, 125f)
+        g.imageRect(output, 320f, 10f, 300f, 125f)
 
         // draw text
         fill(255f)
@@ -216,7 +224,7 @@ class Sketch : PApplet() {
                 .setPosition(w + 220, h)
                 .setSize(120, 20)
                 .setValue(ThermalDetector.elementSize.toFloat())
-                .setRange(1f, 20f)
+                .setRange(0f, 20f)
                 .onChange { e ->
                     ThermalDetector.elementSize = e.controller.value.toInt()
                 }
