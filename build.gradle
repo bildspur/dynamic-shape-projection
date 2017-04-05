@@ -1,0 +1,53 @@
+group 'ch.bildspur.skyge'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext.kotlin_version = '1.0.6'
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'kotlin'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    compile files('lib/opencv/opencv-310.jar')
+
+    compile files('lib/processing/core/library/core.jar')
+    compile files('lib/processing/core/library/gluegen-rt-natives-macosx-universal.jar')
+    compile files('lib/processing/core/library/gluegen-rt.jar')
+    compile files('lib/processing/core/library/jogl-all-natives-macosx-universal.jar')
+    compile files('lib/processing/core/library/jogl-all.jar')
+
+    compile files('lib/plugins/controlP5/controlP5.jar')
+
+    compile files('lib/plugins/minim-2.2.0/library/minim.jar')
+    compile files('lib/plugins/minim-2.2.0/library/jsminim.jar')
+    compile files('lib/plugins/minim-2.2.0/library/jl1.0.jar')
+    compile files('lib/plugins/minim-2.2.0/library/mp3spi1.9.4.jar')
+    compile files('lib/plugins/minim-2.2.0/library/tritonus_aos.jar')
+    compile files('lib/plugins/minim-2.2.0/library/tritonus_share.jar')
+
+    compile files('lib/plugins/syphon/Syphon.jar')
+    compile files('lib/plugins/syphon/jsyphon.jar')
+
+    compile files('lib/plugins/video/library/gstreamer-java.jar')
+    compile files('lib/plugins/video/library/jna.jar')
+    compile files('lib/plugins/video/library/video.jar')
+}
+
+task fatJar(type: Jar) {
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
