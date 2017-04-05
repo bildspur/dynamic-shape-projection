@@ -1,5 +1,7 @@
 package ch.bildspur.dysp.shape
 
+import ch.bildspur.dysp.batch
+import ch.bildspur.dysp.sortTopLeft
 import ch.bildspur.dysp.tracker.ActiveRegion
 
 /**
@@ -7,12 +9,17 @@ import ch.bildspur.dysp.tracker.ActiveRegion
  */
 class PolygonDetector : ShapeDetector {
 
-    override fun detectShapes(regions: List<ActiveRegion>) {
-        this.detectShapes(regions, 4)
+    override fun detectShapes(activeRegions: List<ActiveRegion>) {
+        this.detectShapes(activeRegions, 4)
     }
 
-    fun detectShapes(regions: List<ActiveRegion>, vertexNumber : Int) {
-        // take n regions
-        val nl = regions.sortedBy { it.area }
+    fun detectShapes(activeRegions: List<ActiveRegion>, vertexNumber : Int) {
+        // take n regions based on vertex count
+        val batch = activeRegions
+                .sortedByDescending { it.area }
+                .take(activeRegions.size / vertexNumber * vertexNumber)
+                .sortTopLeft()
+                .asSequence().batch(vertexNumber)
+                .toMutableList()
     }
 }

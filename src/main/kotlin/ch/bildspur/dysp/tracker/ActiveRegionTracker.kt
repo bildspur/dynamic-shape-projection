@@ -3,8 +3,6 @@ package ch.bildspur.dysp.tracker
 import ch.bildspur.dysp.vision.ConnectedComponent
 import ch.fhnw.afpars.util.opencv.distance
 import ch.fhnw.afpars.util.opencv.sparsePoints
-import org.opencv.core.Point
-import org.opencv.core.Size
 
 /**
  * Created by cansik on 12.02.17.

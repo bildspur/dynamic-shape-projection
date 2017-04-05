@@ -1,6 +1,5 @@
 package ch.bildspur.dysp.tracker
 
-import ch.bildspur.dysp.vision.ConnectedComponent
 import org.opencv.core.Point
 
 /**

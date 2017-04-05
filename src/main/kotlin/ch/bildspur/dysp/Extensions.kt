@@ -1,5 +1,7 @@
 package ch.bildspur.dysp
 
+import ch.bildspur.dysp.tracker.ActiveRegion
+import ch.bildspur.dysp.util.BatchingSequence
 import ch.bildspur.dysp.vision.ConnectedComponentsResult
 import javafx.scene.image.Image
 import org.opencv.core.*
@@ -13,6 +15,7 @@ import java.io.ByteArrayInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.*
+import kotlin.comparisons.compareBy
 
 
 /**
@@ -223,4 +226,19 @@ fun PGraphics.imageRect(image : PImage, x : Float, y : Float, width : Float, hei
 {
     val ratio = if(width - image.width < height - image.height) width / image.width else height / image.height
     this.image(image, x, y, image.width * ratio, image.height * ratio)
+}
+
+fun List<ActiveRegion>.sortTopLeft() : List<ActiveRegion>
+{
+    return this.sortedWith(compareBy({ it.center.x }, { it.center.y }))
+}
+
+fun <T> Sequence<T>.batch(n: Int): Sequence<List<T>> {
+    return BatchingSequence(this, n)
+}
+
+fun MatOfPoint.convexHull(clockwise: Boolean = false): MatOfInt {
+    val result = MatOfInt()
+    Imgproc.convexHull(this, result, clockwise)
+    return result
 }
