@@ -4,6 +4,7 @@ import ch.bildspur.dysp.vision.ConnectedComponent
 import ch.fhnw.afpars.util.opencv.distance
 import ch.fhnw.afpars.util.opencv.sparsePoints
 import org.opencv.core.Point
+import org.opencv.core.Size
 
 /**
  * Created by cansik on 12.02.17.
@@ -16,13 +17,15 @@ class ActiveRegionTracker {
 
     fun track(components: List<ConnectedComponent>) {
         // sparse and prepare points
-        val points = components.map { ActivePoint(it.centroid, it) }
+        val points = components.map { ActivePoint(it.centroid, it.area) }
                 .toMutableList()
-
-                /*
                 .sparsePoints(sparsing)
-                .map { Point(it.map { it.x }.average(), it.map { it.y }.average()) }
-                */
+                .map {
+                    ActivePoint(
+                            it.map { it.x }.average(),
+                            it.map { it.y }.average(),
+                            it.map { it.area }.sum())
+                }
 
         // reset all regions
         regions.forEach { it.isDead = true }
@@ -37,7 +40,7 @@ class ActiveRegionTracker {
         regions.forEach { it.lifeTime++ }
 
         // create new regions
-        regions.addAll(points.filter { !it.used }.map { ActiveRegion(it) })
+        regions.addAll(points.filter { !it.used }.map(::ActiveRegion))
     }
 
     private fun matchNearest(points: List<ActivePoint>) {

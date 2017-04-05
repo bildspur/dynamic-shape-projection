@@ -17,6 +17,15 @@ class ConnectedComponent {
 
     val centroid: Point
 
+    constructor(location: Point, size: Size, area: Double, centroid: Point)
+    {
+        this.label = -1
+        this.location = location
+        this.size = size
+        this.area = area
+        this.centroid = centroid
+    }
+
     constructor(label: Int, rectRow: Mat, centroidRow: Mat) {
         this.label = label
 

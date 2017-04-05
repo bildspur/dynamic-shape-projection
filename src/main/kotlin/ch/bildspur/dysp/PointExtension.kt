@@ -6,13 +6,13 @@ import org.opencv.core.Point
 /**
  * Created by cansik on 06.01.17.
  */
-fun MutableList<Point>.sparsePoints(maxDistance: Double): MutableList<MutableList<Point>> {
-    val sparseCloud = mutableListOf<MutableList<Point>>()
+fun <T : Point> MutableList<T>.sparsePoints(maxDistance: Double): MutableList<MutableList<T>> {
+    val sparseCloud = mutableListOf<MutableList<T>>()
     val points = this.toMutableList()
 
     while (!points.isEmpty()) {
         val firstPoint = points.removeAt(0)
-        val group = mutableListOf<Point>()
+        val group = mutableListOf<T>()
         val nearPoints = mutableListOf(firstPoint)
 
         while (!nearPoints.isEmpty()) {
@@ -36,7 +36,7 @@ fun MutableList<Point>.sparsePoints(maxDistance: Double): MutableList<MutableLis
     return sparseCloud
 }
 
-fun MutableList<MutableList<Point>>.combinePoints(): MutableList<Point> {
+fun <T : Point> MutableList<MutableList<T>>.combinePoints(): MutableList<Point> {
     val sparsePoints = mutableListOf<Point>()
     this.mapTo(sparsePoints) { pointList -> Point(pointList.map { it.x }.average(), pointList.map { it.y }.average()) }
     return sparsePoints
