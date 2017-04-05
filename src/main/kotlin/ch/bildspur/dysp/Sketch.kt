@@ -184,13 +184,14 @@ class Sketch : PApplet() {
                 it.strokeWeight(1f)
                 it.stroke(0f, 255f, 0f)
                 it.noFill()
-                it.rect(activeRegion.center.x.toFloat() - (rectSize / 2f),
-                        activeRegion.center.y.toFloat() - (rectSize / 2f),
+                it.rect(activeRegion.x.toFloat() - (rectSize / 2f),
+                        activeRegion.y.toFloat() - (rectSize / 2f),
                         rectSize,
                         rectSize)
 
-                it.fill(0f)
-                it.text("${activeRegion.lifeTime}", activeRegion.center.x.toFloat(), activeRegion.center.y.toFloat())
+                it.fill(255f)
+                it.textSize(20f)
+                it.text("${activeRegion.lifeTime}", activeRegion.x.toFloat(), activeRegion.y.toFloat())
             }
         }
 

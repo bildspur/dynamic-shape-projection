@@ -26,8 +26,8 @@ class PolygonDetector : ShapeDetector {
 
         // create hull and return shapes
         return batch.map { group ->
-            val hull = MatOfPoint(*group.map { it.center }.toTypedArray()).convexHull(clockwise = true)
-            Shape(*hull.toArray().map { group[it].center }.toTypedArray())
+            val hull = MatOfPoint(*group.map { it }.toTypedArray()).convexHull(clockwise = true)
+            Shape(*hull.toArray().map { group[it] }.toTypedArray())
         }
     }
 }

@@ -237,7 +237,7 @@ fun PGraphics.imageRect(image : PImage, x : Float, y : Float, width : Float, hei
 
 fun List<ActiveRegion>.sortTopLeft() : List<ActiveRegion>
 {
-    return this.sortedWith(compareBy({ it.center.x }, { it.center.y }))
+    return this.sortedWith(compareBy({ it.x }, { it.y }))
 }
 
 fun <T> Sequence<T>.batch(n: Int): Sequence<List<T>> {

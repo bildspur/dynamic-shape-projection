@@ -6,6 +6,5 @@ import ch.bildspur.dysp.tracker.ActiveRegion
  * Created by cansik on 05.04.17.
  */
 interface ShapeDetector {
-
     fun detectShapes(activeRegions: List<ActiveRegion>) : List<Shape>
 }
