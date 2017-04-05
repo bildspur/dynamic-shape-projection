@@ -7,12 +7,12 @@ import kotlin.concurrent.thread
 /**
  * Created by cansik on 04.02.17.
  */
-class ThermalAnalyser {
+class InfraredAnalyser {
     var isRunning = false
 
-    val input = LinkedBlockingQueue<ThermalImage>()
+    val input = LinkedBlockingQueue<InfraredImage>()
 
-    val output: Queue<ThermalImage> = LinkedList<ThermalImage>()
+    val output: Queue<InfraredImage> = LinkedList<InfraredImage>()
 
     fun start() {
         isRunning = true
@@ -20,7 +20,7 @@ class ThermalAnalyser {
         thread {
             while (isRunning) {
                 val image = input.take()
-                ThermalDetector.detect(image)
+                InfraredDetector.detect(image)
                 output.offer(image)
             }
         }

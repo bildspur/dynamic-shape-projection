@@ -16,11 +16,13 @@ class ActiveRegionTracker {
 
     fun track(components: List<ConnectedComponent>) {
         // sparse and prepare points
-        val points = components.map { it.centroid }
+        val points = components.map { ActivePoint(it.centroid, it) }
                 .toMutableList()
+
+                /*
                 .sparsePoints(sparsing)
                 .map { Point(it.map { it.x }.average(), it.map { it.y }.average()) }
-                .map(::ActivePoint)
+                */
 
         // reset all regions
         regions.forEach { it.isDead = true }
@@ -35,7 +37,7 @@ class ActiveRegionTracker {
         regions.forEach { it.lifeTime++ }
 
         // create new regions
-        regions.addAll(points.filter { !it.used }.map { ActiveRegion(it.point) })
+        regions.addAll(points.filter { !it.used }.map { ActiveRegion(it) })
     }
 
     private fun matchNearest(points: List<ActivePoint>) {
@@ -45,7 +47,7 @@ class ActiveRegionTracker {
         // fill matrix O((m*n)^2)
         points.forEachIndexed { i, activePoint ->
             regions.forEachIndexed { j, activeRegion ->
-                distances[i][j] = activeRegion.center.distance(activePoint.point)
+                distances[i][j] = activeRegion.center.distance(activePoint)
             }
         }
 
@@ -55,7 +57,7 @@ class ActiveRegionTracker {
 
             if (minDelta <= maxDelta) {
                 val regionIndex = distances[i].indexOf(minDelta)
-                regions[regionIndex].center = activePoint.point
+                regions[regionIndex].center = activePoint
                 regions[regionIndex].isDead = false
 
                 activePoint.used = true

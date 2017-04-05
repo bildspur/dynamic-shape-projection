@@ -8,17 +8,17 @@ import org.opencv.core.Mat
 /**
  * Created by cansik on 04.02.17.
  */
-object ThermalDetector {
+object InfraredDetector {
 
     var threshold = 200.0
     var elementSize = 5
-    var minAreaSize = 875
+    var minAreaSize = 125
 
     init {
 
     }
 
-    fun detect(ti: ThermalImage) {
+    fun detect(ti: InfraredImage) {
         val image = Mat(ti.input.height, ti.input.width, CvType.CV_8UC4)
 
         ti.input.toMat(image)

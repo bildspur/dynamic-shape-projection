@@ -3,9 +3,11 @@ package ch.bildspur.dysp
 import ch.bildspur.dysp.animation.Animation
 import ch.bildspur.dysp.animation.Animator
 import ch.bildspur.dysp.controller.SyphonController
+import ch.bildspur.dysp.shape.PolygonDetector
+import ch.bildspur.dysp.shape.ShapeDetector
 import ch.bildspur.dysp.tracker.ActiveRegionTracker
-import ch.bildspur.dysp.vision.ThermalDetector
-import ch.bildspur.dysp.vision.ThermalImage
+import ch.bildspur.dysp.vision.InfraredDetector
+import ch.bildspur.dysp.vision.InfraredImage
 import ch.fhnw.afpars.util.opencv.map
 import ch.fhnw.afpars.util.opencv.sparsePoints
 import controlP5.ControlP5
@@ -32,6 +34,8 @@ class Sketch : PApplet() {
         @JvmStatic val WINDOW_WIDTH = 640
         @JvmStatic val WINDOW_HEIGHT = 500
 
+        @JvmStatic val DEMO_MODE = true
+
         @JvmStatic val NAME = "Dynamic Shape Detection"
 
         @JvmStatic var instance = PApplet()
@@ -54,6 +58,10 @@ class Sketch : PApplet() {
     var sparsing = 0.0
 
     var camera: Capture? = null
+
+    val shapeDetector : ShapeDetector = PolygonDetector()
+
+    lateinit var demoMovie: Movie
 
     var tracker = ActiveRegionTracker()
 
@@ -82,6 +90,11 @@ class Sketch : PApplet() {
         cp5 = ControlP5(this)
         setupUI()
 
+        if(DEMO_MODE) {
+            demoMovie = Movie(this, "basic_rect_4circles.mov")
+            demoMovie.loop()
+        }
+
         // setup output
         output = createGraphics(OUTPUT_WIDTH, OUTPUT_HEIGHT, PApplet.P2D)
     }
@@ -94,38 +107,43 @@ class Sketch : PApplet() {
             return
         }
 
-        // setup camera lazy
-        if (camera == null) {
-            // setup camera
-            camera = Capture(this)
-            camera!!.start()
+        if(!DEMO_MODE) {
+            // setup camera lazy
+            if (camera == null) {
+                // setup camera
+                camera = Capture(this)
+                camera!!.start()
+            }
+
+            // read webcam image
+            if (camera!!.available())
+                camera!!.read()
+
+            // skip dead frames
+            if (camera!!.width == 0) {
+                text("waiting for frame...", width / 2 - 75f, height / 2f - 50f)
+                return
+            }
         }
 
-        // read webcam image
-        if (camera!!.available())
-            camera!!.read()
-
-        // skip dead frames
-        if (camera!!.width == 0) {
-            text("waiting for frame...", width / 2 - 75f, height / 2f - 50f)
-            return
-        }
+        val sourceImage = if(DEMO_MODE) demoMovie else camera!!
 
         // first time create preview image
         if(!previewCreated)
         {
-            preview = createGraphics(camera!!.width, camera!!.height, PApplet.P2D)
+            preview = createGraphics(sourceImage.width, sourceImage.height, PApplet.P2D)
             previewCreated = true
         }
 
-        val sourceImage = camera!!
-
         // analyse image
-        val ti = ThermalImage(sourceImage)
-        ThermalDetector.detect(ti)
+        val ti = InfraredImage(sourceImage)
+        InfraredDetector.detect(ti)
 
-        // track image
+        // track regions in image
         tracker.track(ti.components)
+
+        // detect shapes based on the regions
+        shapeDetector.detectShapes(tracker.regions)
 
         // draw debug image
         preview.draw {
@@ -182,8 +200,8 @@ class Sketch : PApplet() {
         syphon.sendImageToSyphon(output)
 
         // paint preview
-        g.imageRect(preview, 10f, 10f, 300f, 125f)
-        g.imageRect(output, 320f, 10f, 300f, 125f)
+        g.imageRect(preview, 10f, 10f, 300f, 250f)
+        g.imageRect(output, 320f, 10f, 300f, 250f)
 
         // draw text
         fill(255f)
@@ -214,28 +232,28 @@ class Sketch : PApplet() {
         cp5.addSlider("threshold")
                 .setPosition(w, h)
                 .setSize(120, 20)
-                .setValue(ThermalDetector.threshold.toFloat())
+                .setValue(InfraredDetector.threshold.toFloat())
                 .setRange(0f, 255f)
                 .onChange { e ->
-                    ThermalDetector.threshold = e.controller.value.toDouble()
+                    InfraredDetector.threshold = e.controller.value.toDouble()
                 }
 
         cp5.addSlider("element")
                 .setPosition(w + 220, h)
                 .setSize(120, 20)
-                .setValue(ThermalDetector.elementSize.toFloat())
+                .setValue(InfraredDetector.elementSize.toFloat())
                 .setRange(0f, 20f)
                 .onChange { e ->
-                    ThermalDetector.elementSize = e.controller.value.toInt()
+                    InfraredDetector.elementSize = e.controller.value.toInt()
                 }
 
         cp5.addSlider("min area")
                 .setPosition(w + 440, h)
                 .setSize(120, 20)
-                .setValue(ThermalDetector.minAreaSize.toFloat())
+                .setValue(InfraredDetector.minAreaSize.toFloat())
                 .setRange(0f, 5000f)
                 .onChange { e ->
-                    ThermalDetector.minAreaSize = e.controller.value.toInt()
+                    InfraredDetector.minAreaSize = e.controller.value.toInt()
                 }
 
         cp5.addSlider("sparsing")

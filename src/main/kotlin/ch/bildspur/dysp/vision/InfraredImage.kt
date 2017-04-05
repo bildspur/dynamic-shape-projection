@@ -5,7 +5,7 @@ import processing.core.PImage
 /**
  * Created by cansik on 04.02.17.
  */
-class ThermalImage {
+class InfraredImage {
     val input: PImage
     val components = mutableListOf<ConnectedComponent>()
 
