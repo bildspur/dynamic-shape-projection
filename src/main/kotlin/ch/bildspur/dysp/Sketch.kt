@@ -91,7 +91,7 @@ class Sketch : PApplet() {
         setupUI()
 
         if(DEMO_MODE) {
-            demoMovie = Movie(this, "basic_rect_4circles.mov")
+            demoMovie = Movie(this, "basic_2rect_4circles.mov")
             demoMovie.loop()
         }
 
@@ -132,6 +132,7 @@ class Sketch : PApplet() {
         if(!previewCreated)
         {
             preview = createGraphics(sourceImage.width, sourceImage.height, PApplet.P2D)
+            output = createGraphics(sourceImage.width, sourceImage.height, PApplet.P2D)
             previewCreated = true
         }
 
@@ -143,7 +144,7 @@ class Sketch : PApplet() {
         tracker.track(ti.components)
 
         // detect shapes based on the regions
-        shapeDetector.detectShapes(tracker.regions)
+        val shapes = shapeDetector.detectShapes(tracker.regions)
 
         // draw debug image
         preview.draw {
@@ -193,8 +194,24 @@ class Sketch : PApplet() {
             }
         }
 
+        // create output
+        output.draw { g ->
+            g.background(0f)
+            g.fill(0f, 255f, 0f, 100f)
+            g.stroke(0f, 255f, 0f)
+            g.strokeWeight(3f)
+
+            shapes.forEach { shape ->
+                g.shape {
+                    shape.points.forEach {
+                        g.vertex(it.x.toFloat(), it.y.toFloat())
+                    }
+                }
+            }
+        }
+
         // draw output
-        Animator.update(output)
+        //Animator.update(output)
 
         // send output
         syphon.sendImageToSyphon(output)

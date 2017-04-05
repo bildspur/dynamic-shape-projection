@@ -7,6 +7,7 @@ import javafx.scene.image.Image
 import org.opencv.core.*
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
+import processing.core.PApplet
 import processing.core.PGraphics
 import processing.core.PImage
 import java.awt.image.BufferedImage
@@ -31,6 +32,12 @@ fun PGraphics.draw(block: (g: PGraphics) -> Unit) {
     this.beginDraw()
     block(this)
     this.endDraw()
+}
+
+fun PGraphics.shape(block: (g: PGraphics) -> Unit) {
+    this.beginShape()
+    block(this)
+    this.endShape(PApplet.CLOSE)
 }
 
 fun PGraphics.cross(x: Float, y: Float, size: Float) {
