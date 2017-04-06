@@ -1,14 +1,14 @@
 package ch.bildspur.dysp
 
-import ch.bildspur.dysp.animation.Animation
-import ch.bildspur.dysp.animation.Animator
 import ch.bildspur.dysp.controller.SyphonController
+import ch.bildspur.dysp.io.InputProvider
+import ch.bildspur.dysp.io.KinectProvider
+import ch.bildspur.dysp.io.VideoProvider
 import ch.bildspur.dysp.shape.PolygonDetector
 import ch.bildspur.dysp.shape.ShapeDetector
 import ch.bildspur.dysp.tracker.ActiveRegionTracker
 import ch.bildspur.dysp.vision.InfraredDetector
 import ch.bildspur.dysp.vision.InfraredImage
-import ch.fhnw.afpars.util.opencv.map
 import ch.fhnw.afpars.util.opencv.sparsePoints
 import controlP5.ControlP5
 import org.opencv.core.Core
@@ -34,8 +34,6 @@ class Sketch : PApplet() {
         @JvmStatic val WINDOW_WIDTH = 640
         @JvmStatic val WINDOW_HEIGHT = 500
 
-        @JvmStatic val DEMO_MODE = true
-
         @JvmStatic val NAME = "Dynamic Shape Detection"
 
         @JvmStatic var instance = PApplet()
@@ -57,15 +55,13 @@ class Sketch : PApplet() {
 
     var sparsing = 0.0
 
-    var camera: Capture? = null
-
     val shapeDetector : ShapeDetector = PolygonDetector()
-
-    lateinit var demoMovie: Movie
 
     var tracker = ActiveRegionTracker()
 
     var previewCreated = false
+
+    val inputProvider : InputProvider = KinectProvider(this) //VideoProvider(this, "basic_2rect_4circles.mov")
 
     init {
 
@@ -90,11 +86,6 @@ class Sketch : PApplet() {
         cp5 = ControlP5(this)
         setupUI()
 
-        if(DEMO_MODE) {
-            demoMovie = Movie(this, "basic_2rect_4circles.mov")
-            demoMovie.loop()
-        }
-
         // setup output
         output = createGraphics(OUTPUT_WIDTH, OUTPUT_HEIGHT, PApplet.P2D)
     }
@@ -102,31 +93,24 @@ class Sketch : PApplet() {
     override fun draw() {
         background(55f)
 
+        // skip first two frames
         if (frameCount < 2) {
-            text("loading camera...", width / 2 - 50f, height / 2f - 50f)
+            text("loading input...", width / 2 - 50f, height / 2f - 50f)
             return
         }
 
-        if(!DEMO_MODE) {
-            // setup camera lazy
-            if (camera == null) {
-                // setup camera
-                camera = Capture(this)
-                camera!!.start()
-            }
-
-            // read webcam image
-            if (camera!!.available())
-                camera!!.read()
-
-            // skip dead frames
-            if (camera!!.width == 0) {
-                text("waiting for frame...", width / 2 - 75f, height / 2f - 50f)
-                return
-            }
+        // setup input lazy
+        if (!inputProvider.isSetup) {
+            inputProvider.setup()
         }
 
-        val sourceImage = if(DEMO_MODE) demoMovie else camera!!
+        // skip dead frames
+        if (inputProvider.getImage().width == 0) {
+            text("waiting for frame...", width / 2 - 75f, height / 2f - 50f)
+            return
+        }
+
+        val sourceImage = inputProvider.getImage()
 
         // first time create preview image
         if(!previewCreated)

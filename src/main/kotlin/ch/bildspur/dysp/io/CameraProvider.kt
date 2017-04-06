@@ -1,15 +1,19 @@
-package ch.bildspur.dysp.controller
+package ch.bildspur.dysp.io
 
 import processing.core.PApplet
+import processing.core.PImage
 import processing.video.Capture
 
 /**
- * Created by cansik on 07.02.17.
+ * Created by cansik on 06.04.17.
  */
-class CameraController(internal var sketch: PApplet) {
-    var cam: Capture? = null
+class CameraProvider(internal var sketch: PApplet) : InputProvider
+{
+    override var isSetup: Boolean = false
 
-    fun setupCamera() {
+    lateinit var cam: Capture
+
+    override fun setup() {
         val cameras = Capture.list()
 
         if (cameras.isEmpty()) {
@@ -19,16 +23,14 @@ class CameraController(internal var sketch: PApplet) {
             cameras.forEach { println(it) }
 
             cam = Capture(sketch, cameras[0])
-            cam!!.start()
+            cam.start()
+
+            isSetup = true
         }
     }
 
-    fun read() {
-        if (cam!!.available())
-            cam!!.read()
+    override fun getImage(): PImage {
+        return cam
     }
 
-
-    val image: Capture
-        get() = cam!!
 }

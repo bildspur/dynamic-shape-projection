@@ -23,6 +23,8 @@ dependencies {
 
     compile files('lib/opencv/opencv-310.jar')
 
+    compile files('lib/openkinect/openkinect_processing.jar')
+
     compile files('lib/processing/core/library/core.jar')
     compile files('lib/processing/core/library/gluegen-rt-natives-macosx-universal.jar')
     compile files('lib/processing/core/library/gluegen-rt.jar')
