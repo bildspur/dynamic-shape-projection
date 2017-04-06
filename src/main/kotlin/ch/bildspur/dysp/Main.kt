@@ -12,6 +12,7 @@ class Main {
         @JvmStatic
         fun main(args: Array<String>) {
             val main = Main()
+            main.sketch.args = args
             PApplet.runSketch(arrayOf("Sketch "), main.sketch)
         }
     }

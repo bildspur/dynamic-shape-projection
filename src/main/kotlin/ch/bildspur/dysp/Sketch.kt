@@ -1,6 +1,7 @@
 package ch.bildspur.dysp
 
 import ch.bildspur.dysp.controller.SyphonController
+import ch.bildspur.dysp.io.CameraProvider
 import ch.bildspur.dysp.io.InputProvider
 import ch.bildspur.dysp.io.KinectProvider
 import ch.bildspur.dysp.io.VideoProvider
@@ -61,7 +62,7 @@ class Sketch : PApplet() {
 
     var previewCreated = false
 
-    val inputProvider : InputProvider = KinectProvider(this) //VideoProvider(this, "basic_2rect_4circles.mov")
+    lateinit var inputProvider : InputProvider
 
     init {
 
@@ -85,6 +86,16 @@ class Sketch : PApplet() {
 
         cp5 = ControlP5(this)
         setupUI()
+
+        // create input provider based on argument
+        if(args.contains("-kinect"))
+            inputProvider = KinectProvider(this)
+
+        if(args.contains("-video"))
+            inputProvider = VideoProvider(this, "basic_2rect_4circles.mov")
+
+        if(args.contains("-camera"))
+            inputProvider = CameraProvider(this)
 
         // setup output
         output = createGraphics(OUTPUT_WIDTH, OUTPUT_HEIGHT, PApplet.P2D)
