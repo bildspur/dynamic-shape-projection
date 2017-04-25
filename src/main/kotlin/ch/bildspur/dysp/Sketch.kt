@@ -1,10 +1,7 @@
 package ch.bildspur.dysp
 
 import ch.bildspur.dysp.controller.SyphonController
-import ch.bildspur.dysp.io.CameraProvider
-import ch.bildspur.dysp.io.InputProvider
-import ch.bildspur.dysp.io.KinectProvider
-import ch.bildspur.dysp.io.VideoProvider
+import ch.bildspur.dysp.io.*
 import ch.bildspur.dysp.shape.PolygonDetector
 import ch.bildspur.dysp.shape.ShapeDetector
 import ch.bildspur.dysp.tracker.ActiveRegionTracker
@@ -96,6 +93,9 @@ class Sketch : PApplet() {
 
         if(args.contains("-camera"))
             inputProvider = CameraProvider(this)
+
+        if(args.contains("-ps3"))
+            inputProvider = PS3EyeCamProvider(this)
 
         // setup output
         output = createGraphics(OUTPUT_WIDTH, OUTPUT_HEIGHT, PApplet.P2D)
