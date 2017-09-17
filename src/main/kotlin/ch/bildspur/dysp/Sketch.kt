@@ -102,6 +102,9 @@ class Sketch : PApplet() {
         if(args.contains("-grid-video"))
             inputProvider = VideoProvider(this, "dynamicShape.mov")
 
+        if(args.contains("-grid-image"))
+            inputProvider = ImageProvider(this, "lines.png")
+
         if(args.contains("-camera"))
             inputProvider = CameraProvider(this)
 
