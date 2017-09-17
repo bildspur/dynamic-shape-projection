@@ -12,10 +12,20 @@ buildscript {
     }
 }
 
+apply plugin: 'application'
+mainClassName = "ch.bildspur.dysp.Main"
+applicationDefaultJvmArgs = ["-Djava.library.path=lib/opencv/mac:lib/plugins/video/library/macosx64:lib/plugins/syphon:lib/openkinect/v1/mac/libfreenect.dylib:lib/openkinect/v1/mac/libusb-1.0.0.dylib"]
+
 apply plugin: 'kotlin'
 
 repositories {
     mavenCentral()
+}
+
+run {
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
 }
 
 dependencies {

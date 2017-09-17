@@ -68,6 +68,7 @@ class Sketch : PApplet() {
     override fun settings() {
         size(WINDOW_WIDTH, WINDOW_HEIGHT, PConstants.P2D)
         PJOGL.profile = 1
+        pixelDensity = 2
     }
 
     override fun setup() {
