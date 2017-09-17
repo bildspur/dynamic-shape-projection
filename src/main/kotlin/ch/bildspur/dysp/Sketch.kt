@@ -7,6 +7,8 @@ import ch.bildspur.dysp.shape.ShapeDetector
 import ch.bildspur.dysp.tracker.ActiveRegionTracker
 import ch.bildspur.dysp.vision.InfraredDetector
 import ch.bildspur.dysp.vision.InfraredImage
+import ch.bildspur.dysp.vision.grid.GridDetector
+import ch.bildspur.dysp.vision.grid.GridImage
 import ch.fhnw.afpars.util.opencv.sparsePoints
 import controlP5.ControlP5
 import org.opencv.core.Core
@@ -14,6 +16,7 @@ import org.opencv.core.Point
 import processing.core.PApplet
 import processing.core.PConstants
 import processing.core.PGraphics
+import processing.core.PImage
 import processing.opengl.PJOGL
 import processing.video.Capture
 import processing.video.Movie
@@ -57,7 +60,11 @@ class Sketch : PApplet() {
 
     var tracker = ActiveRegionTracker()
 
+    val gridDetector = GridDetector()
+
     var previewCreated = false
+
+    var isGridDetection = false
 
     lateinit var inputProvider : InputProvider
 
@@ -85,18 +92,24 @@ class Sketch : PApplet() {
         cp5 = ControlP5(this)
         setupUI()
 
-        // create input provider based on argument
+        // create image provider based on argument
         if(args.contains("-kinect"))
             inputProvider = KinectProvider(this)
 
         if(args.contains("-video"))
             inputProvider = VideoProvider(this, "basic_2rect_4circles.mov")
 
+        if(args.contains("-grid-video"))
+            inputProvider = VideoProvider(this, "dynamicShape.mov")
+
         if(args.contains("-camera"))
             inputProvider = CameraProvider(this)
 
         if(args.contains("-ps3"))
             inputProvider = PS3EyeCamProvider(this)
+
+        if(args.contains("-grid"))
+            isGridDetection = true
 
         // setup output
         output = createGraphics(OUTPUT_WIDTH, OUTPUT_HEIGHT, PApplet.P2D)
@@ -107,11 +120,11 @@ class Sketch : PApplet() {
 
         // skip first two frames
         if (frameCount < 2) {
-            text("loading input...", width / 2 - 50f, height / 2f - 50f)
+            text("loading image...", width / 2 - 50f, height / 2f - 50f)
             return
         }
 
-        // setup input lazy
+        // setup image lazy
         if (!inputProvider.isSetup) {
             inputProvider.setup()
         }
@@ -132,6 +145,47 @@ class Sketch : PApplet() {
             previewCreated = true
         }
 
+        if(isGridDetection)
+            detectMovingGrid(sourceImage)
+        else
+            detectMovingEdges(sourceImage)
+
+        // draw output
+        //Animator.update(output)
+
+        // send output
+        syphon.sendImageToSyphon(output)
+
+        // paint preview
+        g.imageRect(preview, 10f, 10f, 300f, 250f)
+        g.imageRect(output, 320f, 10f, 300f, 250f)
+
+        // draw text
+        fill(255f)
+        text("Input", 10f, 270f)
+        text("Output", width - 20f - 250f, 270f)
+
+        cp5.draw()
+        drawFPS()
+    }
+
+    fun detectMovingGrid(sourceImage : PImage)
+    {
+        val grid = GridImage(sourceImage)
+        gridDetector.detect(grid)
+
+        preview.draw {
+            it.image(sourceImage.copy(), 0f, 0f)
+        }
+
+        output.draw {
+            it.background(0f)
+            it.image(grid.debug, 0f, 0f)
+        }
+    }
+
+    fun detectMovingEdges(sourceImage : PImage)
+    {
         // analyse image
         val ti = InfraredImage(sourceImage)
         InfraredDetector.detect(ti)
@@ -206,27 +260,6 @@ class Sketch : PApplet() {
                 }
             }
         }
-
-        // draw output
-        //Animator.update(output)
-
-        // send output
-        syphon.sendImageToSyphon(output)
-
-        // paint preview
-        g.imageRect(preview, 10f, 10f, 300f, 250f)
-        g.imageRect(output, 320f, 10f, 300f, 250f)
-
-        // draw text
-        fill(255f)
-        text("Input", 10f, 270f)
-        text("Output", width - 20f - 250f, 270f)
-
-        cp5.draw()
-        drawFPS()
-
-        // cleanup
-        g.removeCache(ti.input)
     }
 
     fun drawFPS() {
